@@ -1,0 +1,4 @@
+Django
+djangorestframework
+celery
+redis

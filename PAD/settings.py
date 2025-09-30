@@ -9,7 +9,8 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+import os
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -31,11 +32,13 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'core',
 ]
 
 MIDDLEWARE = [
@@ -53,11 +56,11 @@ ROOT_URLCONF = 'PAD.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        'DIRS': [os.path.join(BASE_DIR, 'templates')], # Добавляем эту строку
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -120,3 +123,28 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Celery
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Europe/Chisinau'
+CELERY_ENABLE_UTC = True
+
+CELERY_BEAT_SCHEDULE = {
+    'check-overdue-loans-every-day': {
+        'task': 'core.tasks.check_overdue_loans_and_send_notifications',
+        'schedule': timedelta(days=1), # Запускать каждый день
+        # 'schedule': timedelta(minutes=1), # Для тестирования можно поставить 1 минуту
+    },
+}
+
+# Email
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# library_monolith/settings.py
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/' # Куда перенаправлять после успешного входа
+LOGOUT_REDIRECT_URL = '/login/' # Куда перенаправлять после выхода

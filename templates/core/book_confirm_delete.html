@@ -1,0 +1,28 @@
+<!-- core/templates/core/book_confirm_delete.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Удалить книгу{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h2 class="mb-0">Удалить книгу</h2>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Вы уверены, что хотите удалить книгу "<strong>{{ book.title }}</strong>" автора <strong>{{ book.author }}</strong>?</p>
+                    <p class="card-text text-danger">Это действие необратимо.</p>
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Удалить</button>
+                        <a href="{% url 'book_detail' book.pk %}" class="btn btn-secondary ms-2">Отмена</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

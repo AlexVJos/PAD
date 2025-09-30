@@ -1,0 +1,15 @@
+<!-- core/templates/emails/loan_notification.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Уведомление о займе книги</title>
+</head>
+<body>
+    <p>Здравствуйте, {{ username }}!</p>
+    <p>Вы успешно взяли книгу <strong>"{{ book_title }}"</strong>.</p>
+    <p>Дата выдачи: {{ loan_date }}</p>
+    <p>Крайний срок возврата: {{ due_date }}</p>
+    <p>Пожалуйста, верните книгу вовремя.</p>
+    <p>С уважением,<br>Ваша Библиотека</p>
+</body>
+</html>

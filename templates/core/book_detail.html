@@ -1,0 +1,51 @@
+<!-- core/templates/core/book_detail.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ book.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Главная</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ book.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h1 class="card-title">{{ book.title }}</h1>
+                    <h4 class="card-subtitle mb-2 text-muted">{{ book.author }}</h4>
+                    <hr>
+                    <p class="card-text"><strong>ISBN:</strong> {{ book.isbn }}</p>
+                    <p class="card-text"><strong>Доступные копии:</strong> {{ book.available_copies }}</p>
+                    <p class="card-text"><strong>Всего копий:</strong> {{ book.total_copies }}</p>
+
+                    <div class="mt-4">
+                        {% if user.is_authenticated %}
+                            {% if can_borrow and not user_has_active_loan %}
+                                <form action="{% url 'borrow_book' book.pk %}" method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-success">Взять книгу</button>
+                                </form>
+                            {% elif user_has_active_loan %}
+                                <button class="btn btn-warning" disabled>Вы уже взяли эту книгу</button>
+                            {% else %}
+                                <button class="btn btn-secondary" disabled>Нет доступных копий</button>
+                            {% endif %}
+                        {% else %}
+                            <a href="{% url 'login' %}" class="btn btn-primary">Войдите, чтобы взять книгу</a>
+                        {% endif %}
+
+                        <a href="{% url 'book_edit' book.pk %}" class="btn btn-info ms-2">Редактировать</a>
+                        <a href="{% url 'book_delete' book.pk %}" class="btn btn-danger ms-2">Удалить</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

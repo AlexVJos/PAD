@@ -1,0 +1,15 @@
+<!-- core/templates/emails/overdue_notification.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Уведомление о просрочке возврата книги</title>
+</head>
+<body>
+    <p>Здравствуйте, {{ username }}!</p>
+    <p>Напоминаем, что срок возврата книги <strong>"{{ book_title }}"</strong> истек.</p>
+    <p>Дата выдачи: {{ loan_date }}</p>
+    <p>Крайний срок возврата: {{ due_date }}</p>
+    <p>Пожалуйста, верните книгу как можно скорее.</p>
+    <p>С уважением,<br>Ваша Библиотека</p>
+</body>
+</html>
