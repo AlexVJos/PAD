@@ -56,7 +56,7 @@ ROOT_URLCONF = 'PAD.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')], # Добавляем эту строку
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -125,13 +125,16 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Celery
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = 'redis://redis:6379/0'  # Для Docker
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Europe/Chisinau'
 CELERY_ENABLE_UTC = True
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_TASK_TRACK_STARTED = True
+CELERY_WORKER_LOG_LEVEL = 'DEBUG'
 
 CELERY_BEAT_SCHEDULE = {
     'check-overdue-loans-every-day': {
@@ -142,9 +145,17 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 # Email
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST='smtp.zoho.eu'
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER='pr.todo.app@zohomail.eu'
+EMAIL_HOST_PASSWORD='shunea2014'
+DEFAULT_FROM_EMAIL='pr.todo.app@zohomail.eu'
 
 # library_monolith/settings.py
 LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/' # Куда перенаправлять после успешного входа
-LOGOUT_REDIRECT_URL = '/login/' # Куда перенаправлять после выхода
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/login/'
+
+LOAN_DUE_PERIOD = timedelta(days=14)

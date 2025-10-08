@@ -1,4 +1,3 @@
-<!-- library_monolith/templates/base.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -39,9 +38,11 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'my_loans' %}">Мои займы</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'book_add' %}">Добавить книгу</a>
-                    </li>
+                        {% if user.is_staff or user.is_superuser %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'book_add' %}">Добавить книгу</a>
+                        </li>
+                        {% endif %}
                     {% endif %}
                 </ul>
                 <ul class="navbar-nav">

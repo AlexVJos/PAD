@@ -1,4 +1,5 @@
-# core/views.py
+from django.conf import settings
+from django.utils import timezone
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -91,6 +92,11 @@ class BorrowBookView(LoginRequiredMixin, View):
         book = get_object_or_404(Book, pk=pk)
         user = request.user
 
+        try:
+            existing_loan = Loan.objects.get(user=user, book=book)
+        except Loan.DoesNotExist:
+            existing_loan = None
+
         if not book.can_borrow():
             messages.error(request, 'Извините, все копии этой книги сейчас заняты.')
             return redirect('book_detail', pk=pk)
@@ -98,8 +104,20 @@ class BorrowBookView(LoginRequiredMixin, View):
         if Loan.objects.filter(user=user, book=book, is_returned=False).exists():
             messages.warning(request, 'Вы уже взяли эту книгу и еще не вернули.')
             return redirect('book_detail', pk=pk)
+        elif existing_loan:
+            existing_loan.is_returned = False
+            existing_loan.returned_date = None
+            existing_loan.loan_date = timezone.now()
+            existing_loan.due_date = timezone.now() + settings.LOAN_DUE_PERIOD
+            existing_loan.save()
+            messages.success(
+                request,
+                f'Вы успешно взяли книгу "{book.title}". '
+                f'Срок возврата: {existing_loan.due_date.strftime("%Y-%m-%d")}.'
+            )
+            return redirect('book_detail', pk=pk)
 
-        loan = Loan.objects.create(user=user, book=book)
+        loan = Loan.objects.create(user=user, book=book, due_date=timezone.now() + settings.LOAN_DUE_PERIOD)
         EmailNotificationService.send_loan_confirmation(loan.id) # Отправка уведомления
         messages.success(request, f'Вы успешно взяли книгу "{book.title}". Срок возврата: {loan.due_date.strftime("%Y-%m-%d")}.')
         return redirect('book_detail', pk=pk)
@@ -110,7 +128,7 @@ class ReturnBookView(LoginRequiredMixin, View):
         loan = get_object_or_404(Loan, pk=pk, user=request.user, is_returned=False)
         loan.mark_as_returned()
         messages.success(request, f'Вы успешно вернули книгу "{loan.book.title}".')
-        return redirect('my_loans') # Redirect to user's loans page
+        return redirect('my_loans')
 
 
 class MyLoansView(LoginRequiredMixin, ListView):

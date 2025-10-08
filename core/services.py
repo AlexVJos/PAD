@@ -1,4 +1,3 @@
-# core/services.py
 from .tasks import send_loan_notification_email, send_overdue_notification_email
 
 class EmailNotificationService:

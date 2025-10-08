@@ -1,4 +1,3 @@
-<!-- core/templates/core/book_detail.html -->
 {% extends 'base.html' %}
 {% load static %}
 
@@ -39,9 +38,10 @@
                         {% else %}
                             <a href="{% url 'login' %}" class="btn btn-primary">Войдите, чтобы взять книгу</a>
                         {% endif %}
-
+                        {% if user.is_staff or user.is_superuser %}
                         <a href="{% url 'book_edit' book.pk %}" class="btn btn-info ms-2">Редактировать</a>
                         <a href="{% url 'book_delete' book.pk %}" class="btn btn-danger ms-2">Удалить</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>

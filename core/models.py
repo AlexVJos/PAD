@@ -1,4 +1,3 @@
-# core/models.py
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -32,7 +31,6 @@ class Loan(models.Model):
     class Meta:
         verbose_name = "Займ"
         verbose_name_plural = "Займы"
-        # Запрещаем одному пользователю брать одну и ту же книгу несколько раз, пока она не возвращена
         unique_together = ('user', 'book', 'is_returned')
         constraints = [
             models.UniqueConstraint(
@@ -47,11 +45,9 @@ class Loan(models.Model):
         return f"{self.user.username} borrowed {self.book.title}"
 
     def save(self, *args, **kwargs):
-        if not self.id:  # При создании новой записи займа
+        if not self.id:
             if not self.due_date:
-                # Устанавливаем срок возврата, например, через 14 дней
                 self.due_date = timezone.now() + timedelta(days=14)
-            # Уменьшаем количество доступных копий
             self.book.available_copies -= 1
             self.book.save()
         super().save(*args, **kwargs)

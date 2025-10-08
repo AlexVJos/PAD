@@ -2,15 +2,12 @@
 import os
 from celery import Celery
 
-# Устанавливаем переменную окружения для настроек Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'library_monolith.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'PAD.settings')
 
-app = Celery('library_monolith')
+app = Celery('PAD')
 
-# Используем настройки Django для конфигурации Celery
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
-# Автоматически обнаруживать задачи из всех зарегистрированных приложений Django
 app.autodiscover_tasks()
 
 @app.task(bind=True)
