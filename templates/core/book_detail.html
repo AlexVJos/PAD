@@ -8,12 +8,13 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'home' %}">Главная</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ book.title }}</li>
+            <li class="breadcrumb-item active" aria-current="page">{{ book.title|default:"Недоступно" }}</li>
         </ol>
     </nav>
 
     <div class="row">
         <div class="col-md-8 offset-md-2">
+            {% if book %}
             <div class="card mb-4">
                 <div class="card-body">
                     <h1 class="card-title">{{ book.title }}</h1>
@@ -26,7 +27,7 @@
                     <div class="mt-4">
                         {% if user.is_authenticated %}
                             {% if can_borrow and not user_has_active_loan %}
-                                <form action="{% url 'borrow_book' book.pk %}" method="post" style="display:inline;">
+                                <form action="{% url 'borrow_book' book.id %}" method="post" style="display:inline;">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-success">Взять книгу</button>
                                 </form>
@@ -39,12 +40,17 @@
                             <a href="{% url 'login' %}" class="btn btn-primary">Войдите, чтобы взять книгу</a>
                         {% endif %}
                         {% if user.is_staff or user.is_superuser %}
-                        <a href="{% url 'book_edit' book.pk %}" class="btn btn-info ms-2">Редактировать</a>
-                        <a href="{% url 'book_delete' book.pk %}" class="btn btn-danger ms-2">Удалить</a>
+                        <a href="{% url 'book_edit' book.id %}" class="btn btn-info ms-2">Редактировать</a>
+                        <a href="{% url 'book_delete' book.id %}" class="btn btn-danger ms-2">Удалить</a>
                         {% endif %}
                     </div>
                 </div>
             </div>
+            {% else %}
+            <div class="alert alert-warning">
+                Не удалось загрузить информацию о книге. Пожалуйста, попробуйте позже.
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

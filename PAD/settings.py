@@ -10,7 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
-from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -24,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-#=*gfmeq!8ky8l9osu4ewy6+t+3^n#$p)qcx(vqb^m41radj!g'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "True").lower() == "true"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
 
 
 # Application definition
@@ -124,37 +123,15 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Celery
-CELERY_BROKER_URL = 'redis://redis:6379/0'
-CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'Europe/Chisinau'
-CELERY_ENABLE_UTC = True
-CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
-CELERY_TASK_TRACK_STARTED = True
-CELERY_WORKER_LOG_LEVEL = 'DEBUG'
-
-CELERY_BEAT_SCHEDULE = {
-    'check-overdue-loans-every-day': {
-        'task': 'core.tasks.check_overdue_loans_and_send_notifications',
-        'schedule': timedelta(days=1),
-    },
-}
-
-# Email
-EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST='smtp.zoho.eu'
-EMAIL_PORT=587
-EMAIL_USE_TLS=True
-EMAIL_HOST_USER='pr.todo.app@zohomail.eu'
-EMAIL_HOST_PASSWORD='shunea2014'
-DEFAULT_FROM_EMAIL='pr.todo.app@zohomail.eu'
-
-# library_monolith/settings.py
+# Authentication
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
 
-LOAN_DUE_PERIOD = timedelta(days=14)
+# Client-side service discovery for the UI gateway
+SERVICE_CLIENT_TIMEOUT = float(os.getenv("SERVICE_CLIENT_TIMEOUT", "10"))
+USER_SERVICE_URL = os.getenv("USER_SERVICE_URL", "http://localhost:8001")
+CATALOG_SERVICE_URL = os.getenv("CATALOG_SERVICE_URL", "http://localhost:8002")
+LOAN_SERVICE_URL = os.getenv("LOAN_SERVICE_URL", "http://localhost:8003")
+NOTIFICATION_SERVICE_URL = os.getenv("NOTIFICATION_SERVICE_URL", "http://localhost:8004")
+ANALYTICS_SERVICE_URL = os.getenv("ANALYTICS_SERVICE_URL", "http://localhost:8005")

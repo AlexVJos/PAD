@@ -1,5 +1,8 @@
 Django
-djangorestframework
-celery
-redis
-django-celery-beat==2.7.0
+fastapi
+uvicorn[standard]
+sqlmodel
+httpx
+passlib[bcrypt]
+PyJWT
+aio-pika
