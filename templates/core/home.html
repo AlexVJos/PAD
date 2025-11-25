@@ -21,19 +21,27 @@
         {% endfor %}
     {% endif %}
 
+    {% if metrics %}
+    <div class="alert alert-secondary" role="alert">
+        <strong>Всего займов:</strong> {{ metrics.total_loans }} |
+        <strong>Активные займы:</strong> {{ metrics.active_loans }} |
+        <strong>Возвраты:</strong> {{ metrics.total_returns }}
+    </div>
+    {% endif %}
+
     {% if books %}
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         {% for book in books %}
         <div class="col">
             <div class="card h-100">
                 <div class="card-body">
-                    <h5 class="card-title"><a href="{% url 'book_detail' book.pk %}">{{ book.title }}</a></h5>
+                    <h5 class="card-title"><a href="{% url 'book_detail' book.id %}">{{ book.title }}</a></h5>
                     <p class="card-text"><strong>Автор:</strong> {{ book.author }}</p>
                     <p class="card-text"><strong>ISBN:</strong> {{ book.isbn }}</p>
                     <p class="card-text"><strong>Доступно:</strong> {{ book.available_copies }} из {{ book.total_copies }}</p>
                 </div>
                 <div class="card-footer">
-                    <a href="{% url 'book_detail' book.pk %}" class="btn btn-primary btn-sm">Подробнее</a>
+                    <a href="{% url 'book_detail' book.id %}" class="btn btn-primary btn-sm">Подробнее</a>
                 </div>
             </div>
         </div>

@@ -1,68 +1,108 @@
+version: "3.9"
+
 services:
-  web:
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: uvicorn services.user_service.app:app --host 0.0.0.0 --port 8001
+    volumes:
+      - .:/app
+    environment:
+      - USER_DB_URL=sqlite:///./services/user_service/user.db
+      - USER_JWT_SECRET=super-secret-key
+    ports:
+      - "8001:8001"
+
+  catalog-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: uvicorn services.catalog_service.app:app --host 0.0.0.0 --port 8002
+    volumes:
+      - .:/app
+    environment:
+      - CATALOG_DB_URL=sqlite:///./services/catalog_service/catalog.db
+    ports:
+      - "8002:8002"
+
+  loan-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: uvicorn services.loan_service.app:app --host 0.0.0.0 --port 8003
+    volumes:
+      - .:/app
+    environment:
+      - LOAN_DB_URL=sqlite:///./services/loan_service/loan.db
+      - CATALOG_SERVICE_URL=http://catalog-service:8002
+      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
+      - LOAN_PERIOD_DAYS=14
+    depends_on:
+      - catalog-service
+      - rabbitmq
+    ports:
+      - "8003:8003"
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: uvicorn services.notification_service.app:app --host 0.0.0.0 --port 8004
+    volumes:
+      - .:/app
+    environment:
+      - NOTIFICATION_DB_URL=sqlite:///./services/notification_service/notifications.db
+      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
+    depends_on:
+      - rabbitmq
+    ports:
+      - "8004:8004"
+
+  analytics-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: uvicorn services.analytics_service.app:app --host 0.0.0.0 --port 8005
+    volumes:
+      - .:/app
+    environment:
+      - ANALYTICS_DB_URL=sqlite:///./services/analytics_service/analytics.db
+      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
+    depends_on:
+      - rabbitmq
+    ports:
+      - "8005:8005"
+
+  gateway:
     build:
       context: .
       dockerfile: Dockerfile
     command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/app
-    ports:
-      - "8000:8000"
     environment:
       - DEBUG=True
       - SECRET_KEY=django-insecure-#=*gfmeq!8ky8l9osu4ewy6+t+3^n#$p)qcx(vqb^m41radj!g
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - EMAIL_HOST=smtp.zoho.eu
-      - EMAIL_PORT=587
-      - EMAIL_USE_TLS=True
-      - EMAIL_HOST_USER=pr.todo.app@zohomail.eu
-      - EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+      - USER_SERVICE_URL=http://user-service:8001
+      - CATALOG_SERVICE_URL=http://catalog-service:8002
+      - LOAN_SERVICE_URL=http://loan-service:8003
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8004
+      - ANALYTICS_SERVICE_URL=http://analytics-service:8005
     depends_on:
-      - redis
-    networks:
-      - app-network
-
-  celery:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: celery -A PAD worker -l DEBUG  # -l для loglevel DEBUG
-    volumes:
-      - .:/app
-    environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-    depends_on:
-      - redis
-      - web
-    networks:
-      - app-network
-
-  celery-beat:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: celery -A PAD beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
-    volumes:
-      - .:/app
-    environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-    depends_on:
-      - celery
-      - redis
-      - web
-    networks:
-      - app-network
-
-  redis:
-    image: redis:7-alpine
+      - user-service
+      - catalog-service
+      - loan-service
+      - notification-service
+      - analytics-service
     ports:
-      - "6379:6379"
-    networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
+      - "8000:8000"
