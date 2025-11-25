@@ -3,3 +3,4 @@ djangorestframework
 celery
 redis
 django-celery-beat==2.7.0
+django-environ
