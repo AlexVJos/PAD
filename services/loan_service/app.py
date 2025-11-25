@@ -206,7 +206,7 @@ async def return_loan(loan_id: int, payload: LoanReturnRequest, session: Session
             "returned_date": loan.returned_date.isoformat(),
         },
     )
-    return LoanReturnResponse(status="returned", loan=loan)
+    return LoanReturnResponse(status="returned", loan=LoanRead(**loan.model_dump()))
 
 
 @app.get("/loans/{loan_id}", response_model=LoanRead)

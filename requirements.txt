@@ -6,3 +6,5 @@ httpx
 passlib[bcrypt]
 PyJWT
 aio-pika
+pytest
+pytest-asyncio

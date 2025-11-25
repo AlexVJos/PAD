@@ -123,8 +123,12 @@ def login(payload: LoginRequest, session: Session = Depends(get_session)):
     token = create_token(user)
     return TokenResponse(access_token=token, user=user)
 
+def get_current_user(credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme)) -> User:
+    return decode_token(credentials)
+
+
 @app.get("/users/me", response_model=UserRead)
-def read_current_user(current_user: User = Depends(decode_token)):
+def read_current_user(current_user: User = Depends(get_current_user)):
     return current_user
 
 @app.get("/users/{user_id}", response_model=UserRead)

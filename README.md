@@ -75,5 +75,11 @@ The Django app now functions purely as an orchestrating gateway:
 4. Add books (catalog service)
 5. Borrow/return books; observe notifications and analytics counters update without page refresh via message-driven consumers
 
+## Automated tests & CI/CD
+
+- Run unit tests locally with `pytest`. Each FastAPI service has isolated tests under `tests/`.
+- `.github/workflows/tests.yml` runs the test suite on every push and pull request.
+- `.github/workflows/docker-build.yml` builds and pushes Docker images for the gateway plus every microservice to Docker Hub (set `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` secrets). Each image reuses the shared Dockerfile while injecting a service-specific command via the `DEFAULT_CMD` build argument.
+
 This structure satisfies the requirements for service isolation, per-service data stores, asynchronous communication, and template-driven UI. Extend the pattern with new services by following the `services/<name>` blueprint and wiring them through the gateway and message broker.
 

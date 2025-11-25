@@ -12,6 +12,7 @@ from services.shared.messaging import consume_events
 
 DATABASE_URL = os.getenv("NOTIFICATION_DB_URL", "sqlite:///./services/notification_service/notifications.db")
 AMQP_URL = os.getenv("AMQP_URL", "amqp://guest:guest@rabbitmq:5672/")
+RUN_EVENT_CONSUMER = os.getenv("RUN_EVENT_CONSUMER", "true").lower() == "true"
 
 engine = create_engine(
     DATABASE_URL, connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
@@ -82,7 +83,8 @@ async def start_consumer():
 @app.on_event("startup")
 async def startup_event():
     create_db()
-    asyncio.create_task(start_consumer())
+    if RUN_EVENT_CONSUMER:
+        asyncio.create_task(start_consumer())
 
 
 @app.get("/health")
