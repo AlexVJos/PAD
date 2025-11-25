@@ -125,7 +125,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Celery
-CELERY_BROKER_URL = 'redis://redis:6379/0'  # Для Docker
+CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
@@ -139,8 +139,7 @@ CELERY_WORKER_LOG_LEVEL = 'DEBUG'
 CELERY_BEAT_SCHEDULE = {
     'check-overdue-loans-every-day': {
         'task': 'core.tasks.check_overdue_loans_and_send_notifications',
-        'schedule': timedelta(days=1), # Запускать каждый день
-        # 'schedule': timedelta(minutes=1), # Для тестирования можно поставить 1 минуту
+        'schedule': timedelta(days=1),
     },
 }
 
